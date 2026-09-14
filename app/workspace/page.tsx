@@ -1,4 +1,4 @@
-import WorkspaceBody from '@/components/ui/custom/WorkspaceBody'
+import WorkspaceBody from '@/components/custom/WorkspaceBody'
 import { auth } from '@clerk/nextjs/server'
 import React from 'react'
 

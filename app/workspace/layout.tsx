@@ -1,4 +1,4 @@
-import WorkspaceHeader from '@/components/ui/custom/WorkspaceHeader';
+import WorkspaceHeader from '@/components/custom/WorkspaceHeader';
 import React from 'react'
 
 function WorkspaceLayout({ children }: {
