@@ -2,11 +2,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { UserDetailContext } from '@/context/UserDetailContext';
 import Image from 'next/image';
-import { Button } from '../button';
-import { Card, CardContent } from '../card';
+import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
 import EmptyWorkspace from './EmptyWorkspace';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import RepoDialog from './RepoDialog';
+import { refresh } from 'next/cache';
 
 function WorkspaceBody() {
 
@@ -41,7 +43,7 @@ function WorkspaceBody() {
                 </div>
                 <div>
                     {!token ? <Button onClick={OnAddRepo}>Setup</Button>
-                        : <Button onClick={OnAddRepo}>+ Add Repo</Button>}
+                        : <RepoDialog setRefreshPage={(refresh: boolean) => console.log(refresh)} />}
                 </div>
             </Card>
             <Card className='mt-10'>
