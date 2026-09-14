@@ -7,18 +7,38 @@ import { Card, CardContent } from '../ui/card';
 import EmptyWorkspace from './EmptyWorkspace';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import RepoDialog from './RepoDialog';
+import RepoDialog, { Repo } from './RepoDialog';
 import { refresh } from 'next/cache';
+import UserRepoList from './UserRepoList';
+
+export type UserRepo = {
+    id: number,
+    repoId: number,
+    name: string,
+    fullName: string,
+    private: boolean,
+    htmlUrl: string,
+    description: string,
+    userId: number,
+    owner: string,
+    language: string,
+    defaultBranch: string
+}
 
 function WorkspaceBody() {
 
     const { userDetail } = useContext(UserDetailContext);
     const router = useRouter()
     const [token, setToken] = useState('');
+    const [userRepoList, setUserRepoList] = useState<UserRepo[]>([]);
 
     useEffect(() => {
         GetGithubUserToken();
     }, [])
+
+    useEffect(() => {
+        userDetail && GetUserAddedRepoList();
+    }, [userDetail])
 
     const GetGithubUserToken = async () => {
         const result = await axios.get('/api/github/token');
@@ -30,27 +50,35 @@ function WorkspaceBody() {
         router.push('/api/github');
     }
 
+    const GetUserAddedRepoList = async () => {
+        const result = await axios.get('/api/user-repo?userId=' + userDetail?.id);
+        console.log(result.data);
+        setUserRepoList(result.data);
+
+    }
+
     return (
         <div>
             <div className='flex justify-between items-center'>
-                <h2 className='text-4xl font-medium'>Workspace</h2>
+                <h2 className='text-4xl font-bold'>Workspace</h2>
                 <h2 className='text-blue-800 bg-blue-200 px-2 rounded-lg p-1'>Remaining Credits: {userDetail?.credit}</h2>
             </div>
             <Card className='flex mt-5 justify-between items-center p-4 border rounded-lg'>
                 <div className='flex gap-5 items-center'>
                     <Image src={'/github.png'} alt='github' width={40} height={40} />
-                    <h2 className='text-lg'>Connect Github & Repo</h2>
+                    <h2 className='text-lg'>Connect Github & Add Repositories</h2>
                 </div>
                 <div>
                     {!token ? <Button onClick={OnAddRepo}>Setup</Button>
-                        : <RepoDialog setRefreshPage={(refresh: boolean) => console.log(refresh)} />}
+                        : <RepoDialog setRefreshPage={(refresh: boolean) => GetUserAddedRepoList()} />}
                 </div>
             </Card>
-            <Card className='mt-10'>
+            {!userRepoList ? <Card className='mt-10'>
                 <CardContent className='flex w-full items-center justify-center'>
                     <EmptyWorkspace />
                 </CardContent>
-            </Card>
+            </Card> : <UserRepoList repoList={userRepoList} />}
+
         </div>
     )
 }
