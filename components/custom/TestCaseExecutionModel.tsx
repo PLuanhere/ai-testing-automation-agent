@@ -208,7 +208,7 @@ export default function TestExecutionModal({ isOpen, onClose, testCases, reposit
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-2xl flex flex-col p-6 gap-4 bg-white rounded-2xl shadow-2xl border overflow-hidden select-none">
+            <DialogContent className="w-[95vw] sm:max-w-5xl lg:max-w-6xl h-[88vh] max-h-[850px] flex flex-col p-6 gap-4 bg-white rounded-2xl shadow-2xl border border-[#D1D5DB] overflow-hidden select-none">
                 <DialogHeader className="border-b pb-4 flex flex-row items-center justify-between shrink-0">
                     <div>
                         <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -317,7 +317,7 @@ export default function TestExecutionModal({ isOpen, onClose, testCases, reposit
                 </div>
 
                 {/* Main Dashboard Panel */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-5 overflow-hidden">
+                <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 gap-5 overflow-hidden">
                     {/* Left: Test Cases Queue List */}
                     <div className="md:col-span-1 border rounded-xl overflow-y-auto bg-gray-50/50 p-3 flex flex-col gap-2 shadow-xs">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">
@@ -384,7 +384,7 @@ export default function TestExecutionModal({ isOpen, onClose, testCases, reposit
                                 </div>
 
                                 {/* Body split: Code Accordion + Terminal */}
-                                <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
+                                <div className="flex-1 min-h-0 flex flex-col p-4 gap-4 overflow-y-auto">
                                     {/* Playwright Script Code Block */}
                                     {currentSelectedResult?.browserbaseScript && (
                                         <div className="rounded-lg border overflow-hidden">
@@ -400,7 +400,7 @@ export default function TestExecutionModal({ isOpen, onClose, testCases, reposit
                                     )}
 
                                     {/* Terminal logs panel */}
-                                    <div className="flex-1 flex flex-col rounded-lg border overflow-hidden min-h-48">
+                                    <div className="flex-1 min-h-[160px] flex flex-col rounded-lg border overflow-hidden">
                                         <div className="bg-gray-950 text-gray-200 px-3.5 py-2.5 border-b border-gray-800 flex items-center justify-between shrink-0 font-mono">
                                             <span className="text-xs font-semibold flex items-center gap-1.5 text-emerald-400">
                                                 <Terminal className="h-3.5 w-3.5" /> Console Terminal Output

@@ -31,7 +31,7 @@ function WorkspaceBody() {
 
     const { userDetail } = useContext(UserDetailContext);
     const router = useRouter()
-    const [token, setToken] = useState('');
+    const [isGithubConnected, setIsGithubConnected] = useState(false);
     const [userRepoList, setUserRepoList] = useState<UserRepo[]>([]);
 
     useEffect(() => {
@@ -44,8 +44,7 @@ function WorkspaceBody() {
 
     const GetGithubUserToken = async () => {
         const result = await axios.get('/api/github/token');
-        console.log('Github token from db ', result.data.token);
-        setToken(result.data.token);
+        setIsGithubConnected(result.data.connected);
     }
 
     const OnAddRepo = async () => {
@@ -71,7 +70,7 @@ function WorkspaceBody() {
                     <h2 className='text-lg'>Connect Github & Add Repositories</h2>
                 </div>
                 <div>
-                    {!token ? <Button onClick={OnAddRepo}>Setup</Button>
+                    {!isGithubConnected ? <Button onClick={OnAddRepo}>Setup</Button>
                         : <RepoDialog setRefreshPage={(refresh: boolean) => GetUserAddedRepoList()} />}
                 </div>
             </Card>

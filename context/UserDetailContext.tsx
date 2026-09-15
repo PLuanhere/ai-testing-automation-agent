@@ -1,4 +1,4 @@
 "use client";
 import { createContext } from "react";
 
-export const UserDetailContext = createContext<any>(null)
+export const UserDetailContext = createContext<any>(null);

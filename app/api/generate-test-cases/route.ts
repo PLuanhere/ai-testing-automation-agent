@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
-import { db, TestCasesTable } from "@/db";
+import { db, TestCasesTable, users } from "@/db";
 import { cookies } from "next/headers";
+import { eq } from "drizzle-orm";
 
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
 });
+
 
 const ALLOWED_EXTENSIONS = [
     ".js",
@@ -163,6 +165,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Check user credits
+        const [user] = await db.select().from(users).where(eq(users.id, Number(userId)));
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+        if (user.credit < 200) {
+            return NextResponse.json(
+                { error: "Insufficient credits to generate test cases. Required: 200 credits." },
+                { status: 402 } // Payment Required
+            );
+        }
+
         // 1. Get repo tree
         const repoFiles = await getRepoTree({
             owner,
@@ -241,10 +255,11 @@ Important rules:
 - If route is unclear, infer from Next.js app/page structure.
 - Keep description short, only one line.
 - Return only valid JSON.
+- Use Vietnamese on Results
 `;
 
         const response = await ai.models.generateContent({
-            model: "gemini-3.8-flash",
+            model: "gemini-3.5-flash-lite",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -344,11 +359,16 @@ Important rules:
             )
             .returning();
 
+        // 6. Deduct 200 credits
+        const newCredits = user.credit - 200;
+        await db.update(users).set({ credit: newCredits }).where(eq(users.id, Number(userId)));
+
         return NextResponse.json({
             success: true,
             message: "Test cases generated successfully",
             count: insertedTestCases.length,
             testCases: insertedTestCases,
+            credits: newCredits,
         });
     } catch (error: any) {
         console.error("Generate test cases error:", error);
