@@ -50,7 +50,7 @@ function UserRepoList({ repoList, setReload }: props) {
         passRate: 0
     });
 
-    const { userDetail } = useContext(UserDetailContext);
+    const { userDetail, setUserDetail } = useContext(UserDetailContext);
     const [loading, setLoading] = useState(false);
     const [testCaseLoading, setTestCaseLoading] = useState(false);
     const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -58,15 +58,29 @@ function UserRepoList({ repoList, setReload }: props) {
 
     const handleGenerateTestCases = async (repo: UserRepo) => {
         setLoading(true);
-        const result = await axios.post('/api/generate-test-cases', {
-            userId: userDetail?.id,
-            repoId: repo.repoId,
-            owner: repo.owner,
-            repo: repo.name,
-            branch: repo.defaultBranch,
-        });
-        console.log(result.data);
-        setLoading(false);
+        try {
+            // Implement the logic to call the API route to generate test cases for the selected repository
+            const result = await axios.post('/api/generate-test-cases', {
+                userId: userDetail?.id,
+                repoId: repo?.repoId,
+                owner: repo.owner,
+                repo: repo.name,
+                branch: repo.defaultBranch,
+            });
+
+            console.log(result.data);
+            if (result.data.credits !== undefined) {
+                setUserDetail({ ...userDetail, credits: result.data.credits });
+            }
+
+            // Reload test cases after generation
+            GetTestCases(repo.repoId);
+        } catch (error: any) {
+            console.error(error);
+            alert(error.response?.data?.error || "Failed to generate test cases");
+        } finally {
+            setLoading(false);
+        }
     }
 
     const GetTestCases = async (repoId: number) => {

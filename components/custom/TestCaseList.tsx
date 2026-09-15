@@ -47,9 +47,9 @@ function TestCaseList({ testCase, onReload, repository }: Props) {
                         </div>
                         <div className='gap-4 flex items-center'>
                             <Badge variant={'secondary'}>{testCase?.type}</Badge>
-                            {testCase?.status == 'failed' && <Badge variant={'destructive'} className='text-red-200 font-normal'>{testCase?.status}</Badge>}
-                            {testCase?.status == 'passed' && <Badge variant={'default'} className='text-green-200 font-normal'>{testCase?.status}</Badge>}
-                            {testCase?.status == 'running' && <Badge variant={'default'} className='text-yellow-200 font-normal'>{testCase?.status}</Badge>}
+                            {testCase?.status == 'failed' && <Badge variant={'destructive'} className='text-red-500 font-normal'>{testCase?.status}</Badge>}
+                            {testCase?.status == 'passed' && <Badge variant={'default'} className='text-green-500 font-normal'>{testCase?.status}</Badge>}
+                            {testCase?.status == 'running' && <Badge variant={'default'} className='text-yellow-500 font-normal'>{testCase?.status}</Badge>}
                             <TestCaseSettingDialog testCase={testCase} setReload={onReload} />
                         </div>
                     </div>

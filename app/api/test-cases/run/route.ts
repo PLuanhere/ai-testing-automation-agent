@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { db } from "@/db";
-import { TestCasesTable, repositories } from "@/db/schema";
+import { TestCasesTable, repositories, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { Browserbase } from "@browserbasehq/sdk";
@@ -64,6 +64,8 @@ export async function POST(req: NextRequest) {
             );
         }
 
+
+
         // 1. Fetch test case from DB
         const [testCase] = await db
             .select()
@@ -72,6 +74,18 @@ export async function POST(req: NextRequest) {
 
         if (!testCase) {
             return NextResponse.json({ error: "Test case not found" }, { status: 404 });
+        }
+
+        // Fetch user and check credits
+        const [user] = await db.select().from(users).where(eq(users.id, Number(testCase.userId)));
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+        if (user.credit < 100) {
+            return NextResponse.json(
+                { error: "Insufficient credits to run test case. Minimum 100 required." },
+                { status: 402 }
+            );
         }
 
         // Fetch repository settings for global instructions
@@ -93,6 +107,7 @@ export async function POST(req: NextRequest) {
 
         let scriptText = testCase.browserbaseScript;
         const forceRegenerate = mode === "generate" || !scriptText;
+        let creditDeduction = 70;
 
         // 2. Generate script using Gemini if forced, or if no script is cached
         if (forceRegenerate) {
@@ -205,9 +220,14 @@ Rules for your code:
 11. Just return the executable code.
 `;
             const response = await ai.models.generateContent({
-                model: "gemini-3.8-flash",
+                model: "gemini-3.5-flash-lite",
                 contents: prompt,
             });
+
+            const tokensUsed = response.usageMetadata?.totalTokenCount || 0;
+            if (tokensUsed > 0) {
+                creditDeduction = Math.min(100, 70 + Math.floor(tokensUsed / 100));
+            }
 
             let generatedCode = response.text || "";
             // Clean up any stray markdown wrappers just in case
@@ -302,6 +322,10 @@ Rules for your code:
                 })
                 .where(eq(TestCasesTable.id, testCase.id));
 
+            // 10. Deduct credits
+            const newCredits = user.credit - creditDeduction;
+            await db.update(users).set({ credit: newCredits }).where(eq(users.id, user.id));
+
             return NextResponse.json({
                 success: true,
                 status: "passed",
@@ -309,6 +333,7 @@ Rules for your code:
                 sessionUrl: `https://www.browserbase.com/sessions/${session.id}`,
                 logs,
                 browserbaseScript: scriptText,
+                credits: newCredits,
             });
         } catch (execError: any) {
             console.error("Script execution error:", execError);
@@ -331,6 +356,10 @@ Rules for your code:
                 })
                 .where(eq(TestCasesTable.id, testCase.id));
 
+            // 11. Deduct credits (we still charge for failed executions as resources were used)
+            const newCredits = user.credit - creditDeduction;
+            await db.update(users).set({ credit: newCredits }).where(eq(users.id, user.id));
+
             return NextResponse.json({
                 success: false,
                 status: "failed",
@@ -339,6 +368,7 @@ Rules for your code:
                 sessionUrl: session ? `https://www.browserbase.com/sessions/${session.id}` : null,
                 logs,
                 browserbaseScript: scriptText,
+                credits: newCredits,
             });
         }
     } catch (error: any) {
