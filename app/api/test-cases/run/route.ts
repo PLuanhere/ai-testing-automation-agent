@@ -193,7 +193,13 @@ function assert(condition, message) {
 }
 Rules for your code:
 1. DO NOT import playwright, browserbase, assert, or any other modules.
-2. Navigate to the target route using:
+2. Choose the execution method based on targetRoute:
+   - If targetRoute starts with "/api/", NEVER navigate to it using page.goto().
+   - Inspect the source code to determine whether the endpoint exports GET, POST,
+     PUT, PATCH, or DELETE.
+   - Call it using page.request.get(), page.request.post(),
+     page.request.put(), page.request.patch(), or page.request.delete().
+   - For normal UI routes, navigate using page.goto().
     \`await page.goto('${baseUrl}${testCase.targetRoute || ""}', { waitUntil: 'load', timeout: 15000 })
     followed by a short settle wait: \`await page.waitForTimeout(1000)\`.
 3. Carefully analyze the Source File Context provided to find the EXACT forms, inputs, placeholders, buttons, and elements. Look for:
