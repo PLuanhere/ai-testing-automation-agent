@@ -30,6 +30,8 @@ export type TestCase = {
     repoName: string;
     repoOwner: string;
     targetRoute: string;
+    status: string;
+    browserbaseScript: string;
 }
 
 type StatusData = {
@@ -72,12 +74,16 @@ function UserRepoList({ repoList, setReload }: props) {
         setTestCases([])
         const result = await axios.get(`/api/test-cases?repoId=${repoId}`);
         console.log(result.data);
+        const userTestCase = result.data as TestCase[];
+        const passedTests = userTestCase?.filter((testCase) => testCase.status === 'passed').length || 0;
+        const failedTests = userTestCase?.filter((testCase) => testCase.status === 'failed').length || 0;
+        const passRate = userTestCase?.length ? Math.round((passedTests / userTestCase.length) * 100) : 0;
 
         setStatusData({
             totalTests: result.data.length,
-            passedTests: 0,
-            failedTests: 0,
-            passRate: 0
+            passedTests: passedTests,
+            failedTests: failedTests,
+            passRate: passRate
         })
 
         setTestCases(result.data);
@@ -143,7 +149,8 @@ function UserRepoList({ repoList, setReload }: props) {
                                 </div>
 
 
-                                {!testCaseLoading && testCases.length > 0 && <TestCaseList testCase={testCases} onReload={(repoId: number) => GetTestCases(repoId)} />}
+                                {!testCaseLoading && testCases.length > 0 && <TestCaseList testCase={testCases} onReload={(repoId: number) => GetTestCases(repoId)}
+                                    repository={repo} />}
                                 {testCaseLoading ?
                                     <h2 className='flex gap-3 items-center'>
                                         <Loader2 className='animate-spin' />
