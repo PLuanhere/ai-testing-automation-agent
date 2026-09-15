@@ -12,17 +12,19 @@ import { refresh } from 'next/cache';
 import UserRepoList from './UserRepoList';
 
 export type UserRepo = {
-    id: number,
-    repoId: number,
-    name: string,
-    fullName: string,
-    private: boolean,
-    htmlUrl: string,
-    description: string,
-    userId: number,
-    owner: string,
-    language: string,
-    defaultBranch: string
+    id: number;
+    repoId: number;
+    name: string;
+    fullName: string;
+    private: boolean;
+    htmlUrl: string;
+    description: string;
+    userId: number;
+    owner: string;
+    language: string;
+    defaultBranch: string;
+    targetDomain?: string;
+    globalInstruction?: string;
 }
 
 function WorkspaceBody() {
@@ -77,7 +79,7 @@ function WorkspaceBody() {
                 <CardContent className='flex w-full items-center justify-center'>
                     <EmptyWorkspace />
                 </CardContent>
-            </Card> : <UserRepoList repoList={userRepoList} />}
+            </Card> : <UserRepoList repoList={userRepoList} setReload={() => GetUserAddedRepoList()} />}
 
         </div>
     )
