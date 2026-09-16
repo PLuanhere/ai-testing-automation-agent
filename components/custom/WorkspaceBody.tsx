@@ -38,10 +38,10 @@ export default function WorkspaceBody() {
   }, []);
 
   useEffect(() => {
-    if (userDetail) {
+    if (userDetail?.id) {
       GetUserAddedRepoList();
     }
-  }, [userDetail]);
+  }, [userDetail?.id]);
 
   const GetGithubUserToken = async () => {
     try {
@@ -57,7 +57,9 @@ export default function WorkspaceBody() {
   };
 
   const GetUserAddedRepoList = async () => {
-    setIsLoading(true);
+    if (userRepoList.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const result = await axios.get('/api/user-repo?userId=' + userDetail?.id);
       setUserRepoList(result.data || []);

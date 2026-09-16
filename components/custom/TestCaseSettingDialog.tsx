@@ -112,18 +112,18 @@ function TestCaseSettingDialog({ testCase, setReload }: props) {
                     </div>
                 </div>
 
-                <DialogFooter className="flex items-center justify-end gap-2.5 pt-2">
+                <DialogFooter className="flex items-center justify-end gap-3 pt-4 mt-2">
                     <DialogClose>
                         <Button
                             variant='outline'
-                            className="h-8 px-3.5 text-xs text-slate-400 hover:text-white bg-transparent hover:bg-white/5 border-white/10 rounded-lg"
+                            className="h-8 px-4 text-xs font-medium text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border-white/15 rounded-xl transition-all"
                         >
                             Close
                         </Button>
                     </DialogClose>
                     <Button
                         onClick={updateCase}
-                        className="h-8 px-4 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg shadow-md shadow-emerald-500/20 active:scale-95 transition-all"
+                        className="h-8 px-5 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
                     >
                         Update Case
                     </Button>
