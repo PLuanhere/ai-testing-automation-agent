@@ -4,8 +4,13 @@ import type { Metadata } from "next";
 import Provider from './provider';
 
 export const metadata: Metadata = {
-  title: "AI Test Automation Agent",
-  description: "AI Test Automation Agent",
+  title: "Agent QA | AI Automated Testing Platform",
+  description: "Agent QA - Autonomous AI-powered test generation and execution platform for modern software teams.",
+  icons: {
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 const isClerkConfigured =
