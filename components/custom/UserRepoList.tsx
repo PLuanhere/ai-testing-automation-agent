@@ -1,226 +1,320 @@
-import React, { useContext, useState } from 'react'
-import { UserRepo } from './WorkspaceBody'
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
-import Image from 'next/image'
-import { CheckCircle2, Globe2Icon, Link2Icon, ListChecks, Loader2, Settings2, Sparkles, TrendingUp, XCircle } from 'lucide-react'
-import { Button } from '../ui/button'
-import axios from 'axios'
-import { UserDetailContext } from '@/context/UserDetailContext'
-import TestCaseList from './TestCaseList'
-import RepoSettings from './RepoSettings'
+"use client";
 
-type props = {
-    repoList: UserRepo[],
-    setReload: () => void;
-}
+import React, { useContext, useState } from 'react';
+import { UserRepo } from './WorkspaceBody';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  CheckCircle2,
+  Globe,
+  ListChecks,
+  Loader2,
+  Sparkles,
+  TrendingUp,
+  XCircle,
+  Github,
+  GitBranch,
+  ExternalLink,
+  Code2,
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import axios from 'axios';
+import { UserDetailContext } from '@/context/UserDetailContext';
+import TestCaseList from './TestCaseList';
+import RepoSettings from './RepoSettings';
+
+type Props = {
+  repoList: UserRepo[];
+  setReload: () => void;
+};
 
 export type TestCase = {
-    id: number;
-    title: string;
-    description: string;
-    type: string;
-    repoId: number;
-    targetFiles: string[];
-    expectedResult: string;
-    repoName: string;
-    repoOwner: string;
-    targetRoute: string;
-    status: string;
-    browserbaseScript: string;
-}
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+  repoId: number;
+  targetFiles: string[];
+  expectedResult: string;
+  repoName: string;
+  repoOwner: string;
+  targetRoute: string;
+  status: string;
+  browserbaseScript: string;
+};
 
 type StatusData = {
-    totalTests: number;
-    passedTests: number;
-    failedTests: number;
-    passRate: number;
-}
+  totalTests: number;
+  passedTests: number;
+  failedTests: number;
+  passRate: number;
+};
 
-function UserRepoList({ repoList, setReload }: props) {
+export default function UserRepoList({ repoList, setReload }: Props) {
+  const [statusData, setStatusData] = useState<StatusData>({
+    totalTests: 0,
+    passedTests: 0,
+    failedTests: 0,
+    passRate: 0,
+  });
 
-    const [statusData, setStatusData] = useState<StatusData>({
-        totalTests: 0,
-        passedTests: 0,
-        failedTests: 0,
-        passRate: 0
-    });
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const [loading, setLoading] = useState(false);
+  const [testCaseLoading, setTestCaseLoading] = useState(false);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
 
-    const { userDetail, setUserDetail } = useContext(UserDetailContext);
-    const [loading, setLoading] = useState(false);
-    const [testCaseLoading, setTestCaseLoading] = useState(false);
-    const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const handleGenerateTestCases = async (repo: UserRepo) => {
+    setLoading(true);
+    try {
+      const result = await axios.post('/api/generate-test-cases', {
+        userId: userDetail?.id,
+        repoId: repo?.repoId,
+        owner: repo.owner,
+        repo: repo.name,
+        branch: repo.defaultBranch,
+      });
 
+      if (result.data.credits !== undefined) {
+        setUserDetail({ ...userDetail, credit: result.data.credits });
+      }
 
-    const handleGenerateTestCases = async (repo: UserRepo) => {
-        setLoading(true);
-        try {
-            // Implement the logic to call the API route to generate test cases for the selected repository
-            const result = await axios.post('/api/generate-test-cases', {
-                userId: userDetail?.id,
-                repoId: repo?.repoId,
-                owner: repo.owner,
-                repo: repo.name,
-                branch: repo.defaultBranch,
-            });
-
-            console.log(result.data);
-            if (result.data.credits !== undefined) {
-                setUserDetail({ ...userDetail, credits: result.data.credits });
-            }
-
-            // Reload test cases after generation
-            GetTestCases(repo.repoId);
-        } catch (error: any) {
-            console.error(error);
-            alert(error.response?.data?.error || "Failed to generate test cases");
-        } finally {
-            setLoading(false);
-        }
+      GetTestCases(repo.repoId);
+    } catch (error: any) {
+      console.error(error);
+      alert(error.response?.data?.error || 'Failed to generate test cases');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const GetTestCases = async (repoId: number) => {
-        setTestCaseLoading(true);
-        setTestCases([])
-        const result = await axios.get(`/api/test-cases?repoId=${repoId}`);
-        console.log(result.data);
-        const userTestCase = result.data as TestCase[];
-        const passedTests = userTestCase?.filter((testCase) => testCase.status === 'passed').length || 0;
-        const failedTests = userTestCase?.filter((testCase) => testCase.status === 'failed').length || 0;
-        const passRate = userTestCase?.length ? Math.round((passedTests / userTestCase.length) * 100) : 0;
+  const GetTestCases = async (repoId: number) => {
+    setTestCaseLoading(true);
+    setTestCases([]);
+    try {
+      const result = await axios.get(`/api/test-cases?repoId=${repoId}`);
+      const userTestCase = (result.data as TestCase[]) || [];
+      const passedTests = userTestCase.filter((tc) => tc.status === 'passed').length;
+      const failedTests = userTestCase.filter((tc) => tc.status === 'failed').length;
+      const passRate = userTestCase.length
+        ? Math.round((passedTests / userTestCase.length) * 100)
+        : 0;
 
-        setStatusData({
-            totalTests: result.data.length,
-            passedTests: passedTests,
-            failedTests: failedTests,
-            passRate: passRate
-        })
+      setStatusData({
+        totalTests: userTestCase.length,
+        passedTests,
+        failedTests,
+        passRate,
+      });
 
-        setTestCases(result.data);
-        setTestCaseLoading(false);
+      setTestCases(userTestCase);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTestCaseLoading(false);
     }
-    return (
-        <div className=' mt-6'>
-            <h2 className='my-3 font-bold'>REPOSITORIES</h2>
-            <Accordion className='w-full'
-                onValueChange={(value) => GetTestCases(Number(value))}>
-                {repoList.map((repo) => (
-                    <AccordionItem value={(repo.repoId).toString()} className={'border px-5 rounded-xl w-full mt-4'}>
-                        <AccordionTrigger>
-                            <div className='flex gap-4 items-center'>
-                                <Image src={'/github.png'} alt='github' width={40} height={40} />
-                                <div className='flex flex-col gap-1'>
-                                    <h2 className='text-base font-bold'>
-                                        {repo.fullName}
-                                    </h2>
-                                    <p className='text-xs text-gray-500'>{repo.defaultBranch} | {repo.language}</p>
-                                </div>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className='pt-4 space-y-5'>
-                                <div className='bg-gray-50 p-3 border rounded-xl flex justify-between items-center'>
-                                    <div className='flex gap-3 items-center'>
-                                        <Link2Icon className='text-primary' />
-                                        <h2>Target Domain:</h2>
-                                        <h2 className='bg-white p-1 px-2 border rounded-md text-primary font-semibold'>{repo?.targetDomain}</h2>
-                                    </div>
-                                    <RepoSettings repo={repo} setReload={setReload} />
-                                </div>
-                                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+  };
 
-                                    <StatusCard
-                                        title="Total Tests"
-                                        value={statusData?.totalTests}
-                                        icon={<ListChecks className='h-5 w-5 text-blue-600' />}
-                                        bgColor="bg-blue-50"
-                                    />
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xs font-mono font-bold tracking-wider text-slate-400 uppercase">
+          Connected Repositories ({repoList.length})
+        </h2>
+      </div>
 
-                                    <StatusCard
-                                        title="Passed"
-                                        value={statusData?.passedTests}
-                                        icon={<CheckCircle2 className='h-5 w-5 text-green-600' />}
-                                        bgColor="bg-green-50"
-                                    />
+      <Accordion
+        className="w-full space-y-4"
+        onValueChange={(value: any) => {
+          if (value) GetTestCases(Number(value));
+        }}
+      >
+        {repoList.map((repo) => (
+          <AccordionItem
+            key={repo.repoId}
+            value={repo.repoId.toString()}
+            className="border border-emerald-500/20 bg-gradient-to-b from-[#0e1712] to-[#0a110d] rounded-2xl px-5 py-2 shadow-lg hover:border-emerald-500/40 transition-all"
+          >
+            <AccordionTrigger className="hover:no-underline py-3">
+              <div className="flex items-center justify-between w-full pr-4 text-left">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <Github className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                      {repo.fullName}
+                      {repo.private && (
+                        <span className="text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded">
+                          Private
+                        </span>
+                      )}
+                    </h3>
+                    <div className="flex items-center gap-2.5 text-xs text-slate-400 mt-1">
+                      <span className="flex items-center gap-1 font-mono text-emerald-400">
+                        <GitBranch className="w-3 h-3" />
+                        {repo.defaultBranch || 'main'}
+                      </span>
+                      <span>·</span>
+                      <span className="flex items-center gap-1 text-slate-400">
+                        <Code2 className="w-3 h-3 text-cyan-400" />
+                        {repo.language || 'TypeScript'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                                    <StatusCard
-                                        title="Failed"
-                                        value={statusData?.failedTests}
-                                        icon={<XCircle className='h-5 w-5 text-red-600' />}
-                                        bgColor="bg-red-50"
-                                    />
+                {repo.targetDomain && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400/90 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                    <Globe className="w-3 h-3 text-emerald-400" />
+                    {repo.targetDomain}
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
 
-                                    <StatusCard
-                                        title="Pass Rate"
-                                        value={`${statusData?.passRate}%`}
-                                        icon={<TrendingUp className='h-5 w-5 text-purple-600' />}
-                                        bgColor="bg-purple-50"
-                                    />
-                                </div>
+            <AccordionContent>
+              <div className="pt-4 pb-2 space-y-6">
+                {/* Domain & Settings Bar */}
+                <div className="p-4 rounded-xl bg-black/40 border border-emerald-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                      <Globe className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs text-slate-400">Target Web App Domain:</span>
+                      <div className="text-sm font-mono font-semibold text-emerald-300">
+                        {repo?.targetDomain ? (
+                          <a
+                            href={repo.targetDomain.startsWith('http') ? repo.targetDomain : `https://${repo.targetDomain}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="hover:underline inline-flex items-center gap-1"
+                          >
+                            {repo.targetDomain}
+                            <ExternalLink className="w-3 h-3 text-slate-500" />
+                          </a>
+                        ) : (
+                          <span className="text-amber-400 font-sans text-xs">
+                            Not configured (Click settings to set base URL)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
+                  <RepoSettings repo={repo} setReload={setReload} />
+                </div>
 
-                                {!testCaseLoading && testCases.length > 0 && <TestCaseList testCase={testCases} onReload={(repoId: number) => GetTestCases(repoId)}
-                                    repository={repo} />}
-                                {testCaseLoading ?
-                                    <h2 className='flex gap-3 items-center'>
-                                        <Loader2 className='animate-spin' />
-                                        Please Wait...
-                                    </h2> : testCases?.length == 0 &&
+                {/* 4 Status Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <StatusCard
+                    title="Total Test Cases"
+                    value={statusData.totalTests}
+                    icon={<ListChecks className="w-5 h-5 text-cyan-400" />}
+                    accentColor="text-cyan-400"
+                    glow="from-cyan-500/10"
+                  />
+                  <StatusCard
+                    title="Passed Tests"
+                    value={statusData.passedTests}
+                    icon={<CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+                    accentColor="text-emerald-400"
+                    glow="from-emerald-500/10"
+                  />
+                  <StatusCard
+                    title="Failed Tests"
+                    value={statusData.failedTests}
+                    icon={<XCircle className="w-5 h-5 text-red-400" />}
+                    accentColor="text-red-400"
+                    glow="from-red-500/10"
+                  />
+                  <StatusCard
+                    title="Pass Rate"
+                    value={`${statusData.passRate}%`}
+                    icon={<TrendingUp className="w-5 h-5 text-purple-400" />}
+                    accentColor="text-purple-400"
+                    glow="from-purple-500/10"
+                  />
+                </div>
 
-                                    <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 border rounded-xl p-4 bg-gray-50'>
-                                        <div>
-                                            <h3 className='font-medium'>
-                                                {loading ? 'Generating Test Cases...' : 'Generate AI Test Cases'}
-                                            </h3>
-                                            <p className='text-sm text-gray-500 mt-1'>
-                                                Analyze this repository and generate automated test cases using AI.
-                                            </p>
-                                        </div>
+                {/* Test Cases List or Generator Prompt */}
+                {testCaseLoading ? (
+                  <div className="p-8 text-center rounded-xl bg-black/30 border border-emerald-500/15 flex items-center justify-center gap-3 text-slate-400 font-mono text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                    Fetching synthesized test cases...
+                  </div>
+                ) : testCases.length > 0 ? (
+                  <TestCaseList
+                    testCase={testCases}
+                    onReload={(repoId: number) => GetTestCases(repoId)}
+                    repository={repo}
+                  />
+                ) : (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-emerald-500/20 rounded-xl p-5 bg-gradient-to-r from-emerald-950/20 via-black/40 to-black/40 shadow-inner">
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                        {loading ? 'Synthesizing Test Cases...' : 'Synthesize AI Test Cases'}
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                        Agent QA will crawl your Next.js routes, server components, and interactive forms to generate automated Playwright specifications.
+                      </p>
+                    </div>
 
-                                        <Button className='gap-2'
-                                            disabled={loading}
-                                            onClick={() => handleGenerateTestCases(repo)}>
-                                            {loading ? <Loader2 className='animate-spin' /> : <Sparkles className='h-4 w-4' />}
-                                            Generate Test Cases
-                                        </Button>
-                                    </div>
-                                }
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </div>
-    )
+                    <Button
+                      disabled={loading}
+                      onClick={() => handleGenerateTestCases(repo)}
+                      className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all gap-2 shrink-0"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Crawling Repo...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          Generate AI Test Suite
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
 }
-
-export default UserRepoList
 
 function StatusCard({
-    title,
-    value,
-    icon,
-    bgColor
+  title,
+  value,
+  icon,
+  accentColor,
+  glow,
 }: {
-    title: string
-    value: string | number
-    icon: React.ReactNode
-    bgColor: string
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  accentColor: string;
+  glow: string;
 }) {
-    return (
-        <div className='border rounded-xl p-4 flex items-center justify-between bg-white'>
-            <div>
-                <p className='text-sm text-gray-500'>{title}</p>
-                <h3 className='text-2xl font-semibold mt-1'>{value}</h3>
-            </div>
-
-            <div className={`h-10 w-10 rounded-full flex items-center justify-center ${bgColor}`}>
-                {icon}
-            </div>
-        </div>
-    )
+  return (
+    <div className={`border border-white/10 rounded-xl p-4 bg-gradient-to-br ${glow} to-black/50 backdrop-blur-md flex items-center justify-between shadow-sm`}>
+      <div>
+        <p className="text-xs text-slate-400 font-medium">{title}</p>
+        <h3 className={`text-2xl font-bold font-mono mt-1 ${accentColor}`}>{value}</h3>
+      </div>
+      <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+    </div>
+  );
 }
