@@ -11,6 +11,8 @@ const ai = new GoogleGenAI({
 
 
 const ALLOWED_EXTENSIONS = [
+    ".html",
+    ".css",
     ".js",
     ".jsx",
     ".ts",
@@ -65,7 +67,12 @@ function isUsefulFile(path: string) {
         path.includes(item)
     );
 
-    return !isIgnored && isAllowedExtension && isImportantPath;
+    // Static sites commonly keep index.html, styles, and scripts at the repo
+    // root instead of under src/, app/, or components/. Keep those files in
+    // the AI context as long as their extension is otherwise allowed.
+    const isRootFile = !path.includes("/");
+
+    return !isIgnored && isAllowedExtension && (isImportantPath || isRootFile);
 }
 
 async function getRepoTree({
