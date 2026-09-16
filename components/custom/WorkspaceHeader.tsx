@@ -15,7 +15,7 @@ export default function WorkspaceHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo & Workspace Breadcrumb */}
         <div className="flex items-center gap-4">
-          <Logo size="md" variant="dark" href="/workspace" />
+          <Logo size="md" variant="dark" href="/" />
           <span className="hidden sm:inline-block text-slate-600">/</span>
           <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-500/20">
             <Layers className="w-3.5 h-3.5" />

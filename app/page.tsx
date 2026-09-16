@@ -491,6 +491,220 @@ const FaqItem: FC<{ q: string; a: string }> = ({ q, a }) => {
   );
 };
 
+// ─── How to Use Section Component ─────────────────────────────────
+const HowToUseSection: FC = () => {
+  const [activeStep, setActiveStep] = useState(0);
+
+  const steps = [
+    {
+      step: "01",
+      badge: "Step 1: Connect",
+      title: "Connect your GitHub Repository",
+      subtitle: "1-Click OAuth Authorization",
+      desc: "Authorize Agent QA with your GitHub account and select any repository. Agent QA immediately parses your route declarations, server components, and interactive UI forms.",
+      bullets: [
+        "Zero CLI or configuration files required",
+        "Supports private and public repositories",
+        "Automatic route mapping and component graph",
+      ],
+      terminal: `$ agent-qa connect --repo github.com/acme/storefront\n✦ GitHub OAuth Authorized: @developer\n✦ Discovered: 14 Next.js App Router routes, 38 components\n✦ Environment: React 19, TypeScript, Tailwind CSS`,
+      tip: "Takes under 15 seconds. No credit card required.",
+      cta: "Connect Repo in Workspace",
+    },
+    {
+      step: "02",
+      badge: "Step 2: Configure",
+      title: "Set Target App Domain & Instructions",
+      subtitle: "Preview, Staging, or Localhost",
+      desc: "Specify your website's URL (such as a Vercel preview deployment or localhost) where headless cloud browsers navigate. Optionally add test credentials or instructions.",
+      bullets: [
+        "Supports Vercel preview URLs, staging, & production",
+        "Global instructions for test accounts & auth cookies",
+        "Encrypted credential storage with zero leak risk",
+      ],
+      terminal: `// Project Configuration · storefront\nTARGET_DOMAIN = "https://preview.acme-corp.com"\nGLOBAL_INSTRUCTIONS = "Use test user: demo@acme.com / Pass123!\nDismiss cookie consent modal on initial page load."`,
+      tip: "Agent QA automatically injects these parameters during test execution.",
+      cta: "Configure URL",
+    },
+    {
+      step: "03",
+      badge: "Step 3: Synthesize",
+      title: "Synthesize Autonomous Test Suites",
+      subtitle: "Gemini 2.5 Autonomous AST Synthesis",
+      desc: "Click 'Generate AI Test Suite'. Gemini AI analyzes your state transitions, form validations, and user journeys to create 20+ comprehensive Playwright test cases.",
+      bullets: [
+        "Comprehensive coverage: Auth, Checkout, Search, Edge cases",
+        "Standard Playwright TypeScript code output",
+        "Edit, customize, or add manual test assertions anytime",
+      ],
+      terminal: `✦ Synthesizing Playwright specs with Gemini AI...\n  ✓ TC-01: Auth cookie & session persistence (0.8s)\n  ✓ TC-02: Stripe checkout discount calculation (1.4s)\n  ✓ TC-03: Cart inventory decrement on purchase (1.1s)\n  ✓ TC-04: Self-healing selector test on /checkout (0.9s)`,
+      tip: "Over 20+ production-grade test cases generated in ~5 seconds.",
+      cta: "Synthesize Tests",
+    },
+    {
+      step: "04",
+      badge: "Step 4: Execute",
+      title: "Run Cloud Tests & Session Replays",
+      subtitle: "Parallel Execution via Browserbase",
+      desc: "Click 'Run Test Suite'. Tests run concurrently across real cloud browsers with video recordings, step traces, and Self-Healing selectors that adapt when UI classes shift.",
+      bullets: [
+        "Headless Chromium, WebKit (Safari), & Firefox Quantum",
+        "Self-Healing selectors auto-resolve broken classes",
+        "Full session video replay and network waterfall traces",
+      ],
+      terminal: `✦ Launching Browserbase Cloud Grid (4 Parallel Workers)...\n  [1/4] Chromium 120.0: auth.spec.ts → PASSED (0.9s)\n  [2/4] WebKit 17.2: checkout.spec.ts → PASSED (1.4s)\n  [3/4] Firefox 121.0: cart.spec.ts → PASSED (1.1s)\n  [4/4] Chromium 120.0: search.spec.ts → PASSED (0.8s)\n✓ 100% Suite Pass Rate · Session Video Saved`,
+      tip: "Download standard Playwright code or commit it directly to GitHub.",
+      cta: "Run Suite",
+    },
+  ];
+
+  const curr = steps[activeStep];
+
+  return (
+    <section id="how-to-use" className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto scroll-mt-20">
+      <div id="how-it-works" className="scroll-mt-20">
+        <div className="text-center mb-16">
+          <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-3.5 py-1 rounded-full border border-emerald-500/25 inline-flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            Quick Start Guide
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-4 tracking-tight">
+            How to Use Agent QA
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+              in 4 Simple Steps
+            </span>
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto mt-3 leading-relaxed">
+            From connecting your repository to watching your first automated test run on cloud browsers in under 3 minutes.
+          </p>
+        </div>
+
+        {/* ── STEP SELECTOR TABS ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          {steps.map((s, idx) => {
+            const isActive = activeStep === idx;
+            return (
+              <button
+                key={s.step}
+                onClick={() => setActiveStep(idx)}
+                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                  isActive
+                    ? "bg-gradient-to-br from-[#0e1a12] to-[#0a120d] border-emerald-500/50 shadow-[0_0_25px_rgba(16,185,129,0.15)]"
+                    : "bg-[#0a100c]/60 border-white/10 hover:border-emerald-500/30 hover:bg-[#0c140f]"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${
+                      isActive
+                        ? "text-emerald-300 bg-emerald-500/20 border-emerald-500/40"
+                        : "text-slate-400 bg-black/40 border-white/10"
+                    }`}
+                  >
+                    {s.step}
+                  </span>
+                  {isActive && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-white tracking-tight">
+                  {s.title}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                  {s.subtitle}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── ACTIVE STEP DETAIL CARD (Interactive Preview) ── */}
+        <div className="rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-[#0c1610] via-[#09120c] to-[#070e09] p-6 sm:p-8 shadow-2xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Explanations & Bullet Points */}
+            <div className="lg:col-span-6 space-y-5 text-left">
+              <div className="inline-flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1 rounded-full">
+                <span>{curr.badge}</span>
+                <span>·</span>
+                <span className="text-slate-400">Step {activeStep + 1} of 4</span>
+              </div>
+
+              <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                {curr.title}
+              </h3>
+
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                {curr.desc}
+              </p>
+
+              <div className="space-y-2.5 pt-2">
+                {curr.bullets.map((b, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>{b}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 flex flex-wrap items-center gap-3">
+                {activeStep < 3 ? (
+                  <button
+                    onClick={() => setActiveStep((prev) => Math.min(prev + 1, 3))}
+                    className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                  >
+                    Next: Step {activeStep + 2}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <Link
+                    href="/workspace"
+                    className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                  >
+                    Start Testing Now in Workspace
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
+
+                <span className="text-xs text-slate-500 italic">
+                  💡 {curr.tip}
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: Code & Terminal Simulation View */}
+            <div className="lg:col-span-6">
+              <div className="rounded-xl border border-emerald-500/20 bg-black/70 shadow-inner overflow-hidden text-left font-mono text-xs">
+                {/* Window Chrome */}
+                <div className="flex items-center justify-between px-4 py-2.5 bg-[#090f0c] border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                    <span className="ml-2 text-slate-400 text-[11px]">agent-qa · step-0{activeStep + 1}</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400/80">Interactive Guide</span>
+                </div>
+
+                {/* Simulated Content */}
+                <div className="p-4 sm:p-5 text-emerald-300 leading-relaxed whitespace-pre-wrap overflow-x-auto min-h-[220px]">
+                  {curr.terminal}
+                </div>
+
+                {/* Footer status */}
+                <div className="px-4 py-2 bg-emerald-950/20 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1.5 text-emerald-400">
+                    <Check className="w-3.5 h-3.5" /> Ready in production
+                  </span>
+                  <span>Agent QA 2.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // MAIN LANDING PAGE COMPONENT
 // ═══════════════════════════════════════════════════════════════════
@@ -534,8 +748,8 @@ export default function AgentQALanding() {
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-1 bg-black/40 border border-emerald-500/15 rounded-full px-4 py-1.5 backdrop-blur-md">
             {[
+              { label: "How to Use", href: "#how-to-use" },
               { label: "Features", href: "#features" },
-              { label: "How It Works", href: "#how-it-works" },
               { label: "Interactive Demo", href: "#demo" },
               { label: "Comparison", href: "#comparison" },
               { label: "FAQ", href: "#faq" },
@@ -583,8 +797,8 @@ export default function AgentQALanding() {
           <div className="md:hidden bg-[#0a100c]/98 border-b border-emerald-500/20 px-6 py-6 space-y-4 backdrop-blur-2xl">
             <nav className="flex flex-col space-y-3">
               {[
+                { label: "How to Use", href: "#how-to-use" },
                 { label: "Features", href: "#features" },
-                { label: "How It Works", href: "#how-it-works" },
                 { label: "Interactive Demo", href: "#demo" },
                 { label: "Comparison", href: "#comparison" },
                 { label: "FAQ", href: "#faq" },
@@ -694,68 +908,9 @@ export default function AgentQALanding() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS (4 STEPS) ── */}
-      <section id="how-it-works" className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/25">
-            Workflow Architecture
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-4">
-            Zero setup. From code commit to tested app.
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto mt-2">
-            Agent QA automates the entire testing lifecycle so your engineers can focus on shipping features.
-          </p>
-        </div>
+      {/* ── HOW TO USE (INTERACTIVE 4 STEPS) ── */}
+      <HowToUseSection />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              step: "01",
-              icon: Code2,
-              title: "Connect Repo & AST Crawl",
-              desc: "Authorize your GitHub repo. Agent QA inspects Next.js routes, server components, and form handlers.",
-            },
-            {
-              step: "02",
-              icon: Sparkles,
-              title: "AI Scenario Synthesis",
-              desc: "Gemini 2.5 Flash analyzes user flows, authentication guards, and generates real Playwright test specs.",
-            },
-            {
-              step: "03",
-              icon: Globe,
-              title: "Browserbase Cloud Execution",
-              desc: "Tests run across Chrome, Firefox, and WebKit on Browserbase's cloud infrastructure with video recording.",
-            },
-            {
-              step: "04",
-              icon: ShieldCheck,
-              title: "Self-Healing & PR Reports",
-              desc: "Selectors self-heal when classes shift. Detailed video traces and fix PRs are posted directly to your repo.",
-            },
-          ].map((s, idx) => {
-            const Icon = s.icon;
-            return (
-              <div
-                key={s.step}
-                className="rounded-2xl border border-emerald-500/15 bg-[#0b120e] p-6 hover:border-emerald-500/40 transition-all duration-300 relative group"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
-                    {s.step}
-                  </span>
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                </div>
-                <h3 className="text-base font-bold text-slate-100 mb-2">{s.title}</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{s.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
       {/* ── BENTO GRID FEATURES ── */}
       <section id="features" className="relative z-10 py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
@@ -1045,11 +1200,11 @@ export default function AgentQALanding() {
           </div>
 
           <div className="flex items-center gap-6 text-xs text-slate-400">
+            <a href="#how-to-use" className="hover:text-emerald-400 transition-colors">
+              How to Use
+            </a>
             <a href="#features" className="hover:text-emerald-400 transition-colors">
               Features
-            </a>
-            <a href="#how-it-works" className="hover:text-emerald-400 transition-colors">
-              How It Works
             </a>
             <a href="#demo" className="hover:text-emerald-400 transition-colors">
               Sandbox
